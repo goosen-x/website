@@ -1,0 +1,153 @@
+---
+import Button from '@moscowcss/ui/components/Button';
+import ChoiceGroup from '@moscowcss/ui/components/ChoiceGroup';
+import Field from '@moscowcss/ui/components/Field';
+import H2 from '@moscowcss/ui/components/H2';
+import H3 from '@moscowcss/ui/components/H3';
+import { localizePath, useTranslations, type Locale, type UiKey } from '../i18n';
+import type { FormKind } from '../forms/payload';
+import FormFallback from './FormFallback.astro';
+import { captcha, form as formClass, group, note, panel, policy, root, status, submit, trap } from './FormPage.css';
+
+// Форма под текстом документа с полем `form` (спека 010): поля, приманка для ботов, капча и места под сообщения.
+// Данные отправляет скрипт `forms/form.client.ts`; без него форма скрыта и показан список, куда написать.
+interface Props {
+  form: FormKind;
+  locale: Locale;
+}
+
+const { form, locale } = Astro.props;
+const t = useTranslations(locale);
+const options = (prefix: string, values: readonly string[]) =>
+  values.map((value) => ({ value, label: t(`${prefix}.${value}` as UiKey) }));
+const scale = ['1', '2', '3', '4', '5'].map((value) => ({ value, label: value }));
+const [consentBefore = '', consentAfter = ''] = t('forms.cfp.consent').split('{link}');
+const privacy = localizePath(locale, 'privacy');
+
+const KEYS = [
+  'forms.sending',
+  'forms.fallback.title',
+  'forms.error.required',
+  'forms.error.choose',
+  'forms.error.consent',
+  'forms.error.invalid',
+  'forms.error.summary',
+  'forms.error.rateLimited',
+  'forms.error.blocked',
+  'forms.error.captcha',
+  'forms.error.captchaMissing',
+  'forms.error.captchaLoad',
+  'forms.error.rejected',
+  'forms.feedback.event',
+  'forms.feedback.loadFailed',
+] as const satisfies readonly UiKey[];
+const messages = Object.fromEntries(KEYS.map((key) => [key, t(key)]));
+const loads = form !== 'cfp';
+---
+
+<section class={root} data-form-root data-form={form} data-locale={locale} data-messages={JSON.stringify(messages)}>
+  <noscript>
+    <FormFallback locale={locale} message={t('forms.noscript')} />
+  </noscript>
+  {loads && <p class={status} role="status" data-form-loading hidden>{t('forms.feedback.loading')}</p>}
+  {form === 'feedback' && <p class={status} data-form-none hidden>{t('forms.feedback.none')}</p>}
+
+  <form class={formClass} novalidate hidden data-form-form>
+    <p class={note}>{t('forms.requiredNote')}</p>
+
+    {
+      form === 'cfp' && (
+        <>
+          <Field name="contact" label={t('forms.cfp.contact')} hint={t('forms.cfp.contactHint')} required autocomplete="off" />
+          <Field name="title" label={t('forms.cfp.title')} required />
+          <Field name="theses" label={t('forms.cfp.theses')} hint={t('forms.cfp.thesesHint')} control="textarea" rows={6} />
+          <ChoiceGroup name="format" legend={t('forms.cfp.format')} options={options('forms.cfp.format', ['talk', 'standup', 'workshop', 'other'])} layout="row" />
+          <ChoiceGroup name="readiness" legend={t('forms.cfp.readiness')} options={options('forms.cfp.readiness', ['idea', 'theses', 'slides', 'presented'])} layout="row" />
+          <Field name="comment" label={t('forms.cfp.comment')} control="textarea" rows={4} />
+          <Field name="consent" control="checkbox" required>
+            {consentBefore}<a href={privacy} target="_blank" rel="noopener noreferrer">{t('forms.cfp.consentLink')}</a>{consentAfter}
+          </Field>
+        </>
+      )
+    }
+
+    {
+      form === 'feedback' && (
+        <>
+          <p class={note} data-event-info />
+          <p class={note}>{t('forms.feedback.anonymous')}</p>
+          <ChoiceGroup name="attendance" legend={t('forms.feedback.attendance')} options={options('forms.feedback.attendance', ['online', 'offline'])} layout="row" required />
+          <ChoiceGroup name="eventRating" legend={t('forms.feedback.eventRating')} hint={t('forms.feedback.scaleHint')} options={scale} layout="row" required />
+          <Field name="eventComment" label={t('forms.feedback.eventComment')} control="textarea" rows={4} />
+          <div class={group} data-venue-block hidden>
+            <ChoiceGroup name="venueRating" legend={t('forms.feedback.venueRating')} hint={t('forms.feedback.scaleHint')} options={scale} layout="row" required />
+            <Field name="venueComment" label={t('forms.feedback.venueComment')} control="textarea" rows={4} />
+          </div>
+          <div class={group} data-speakers hidden>
+            <H2>{t('forms.feedback.speakers')}</H2>
+            <div class={group} data-speakers-list />
+            <template data-speaker-template>
+              <div class={group}>
+                <H3>__speaker__</H3>
+                <ChoiceGroup
+                  name="speakers.__i__.rating"
+                  legend={t('forms.feedback.speakerRating').replace('{speaker}', '__speaker__')}
+                  hint="__talk__"
+                  options={scale}
+                  layout="row"
+                  required
+                />
+                <Field name="speakers.__i__.comment" label={t('forms.feedback.speakerComment').replace('{speaker}', '__speaker__')} control="textarea" rows={3} />
+              </div>
+            </template>
+          </div>
+        </>
+      )
+    }
+
+    {
+      form === 'question' && (
+        <>
+          <ChoiceGroup name="target" legend={t('forms.question.target')} options={options('forms.question.target', ['speaker', 'organizers'])} layout="row" required />
+          <p class={note} data-no-event hidden>{t('forms.question.noEvent')}</p>
+          <div class={group} data-speaker-pick hidden>
+            <Field name="speakerId" label={t('forms.question.speaker')} control="select" required>
+              <option value="">{t('forms.question.choose')}</option>
+            </Field>
+          </div>
+          <Field name="text" label={t('forms.question.text')} control="textarea" rows={6} required />
+          <Field name="contact" label={t('forms.question.contact')} hint={t('forms.question.contactHint')} autocomplete="off" />
+        </>
+      )
+    }
+
+    <div class={trap} aria-hidden="true">
+      <label>
+        {t('forms.honeypot')}
+        <input type="text" name="website" tabindex="-1" autocomplete="off" />
+      </label>
+    </div>
+
+    <div class={group}>
+      <div class={captcha} role="group" aria-label={t('forms.captcha')} data-form-captcha></div>
+      <p class={status} data-captcha-error hidden></p>
+    </div>
+
+    <Button class={submit} type="submit" data-form-submit>{t('forms.submit')}</Button>
+    <p class={status} role="status" aria-live="polite" data-form-status></p>
+  </form>
+
+  <FormFallback locale={locale} message={t('forms.fallback.title')} hidden data-form-fallback />
+
+  <div class={panel} tabindex="-1" role="status" hidden data-form-success>
+    <p>{t(`forms.${form}.success` as UiKey)}</p>
+  </div>
+
+  <p class={policy}><a href={privacy}>{t('forms.privacy')}</a></p>
+</section>
+
+<script>
+  import { setupForm } from '../forms/form.client';
+
+  document.querySelectorAll<HTMLElement>('[data-form-root]').forEach(setupForm);
+</script>

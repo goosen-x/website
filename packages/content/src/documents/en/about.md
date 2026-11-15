@@ -32,6 +32,15 @@ contacts:
       links:
         - label: "@moscowcss_chat"
           url: "https://t.me/moscowcss_chat"
+    - title: "Forms on the site"
+      text: "A talk proposal, meetup feedback and a question to a speaker or the organisers: you can send them right here, without Telegram."
+      links:
+        - label: "Propose a talk"
+          url: "https://css.moscow/en/cfp/"
+        - label: "Meetup feedback"
+          url: "https://css.moscow/en/feedback/"
+        - label: "Ask a question"
+          url: "https://css.moscow/en/question/"
     - title: "Speak at a meetup"
       text: "We look for frontend developers, markup developers and interface designers, and welcome managers and developer advocates. Read the guide and write to the organisers: they will help with the topic, the programme and the preparation."
       links:

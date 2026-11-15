@@ -16,6 +16,7 @@ Decisions: `specs/001-blog-like-architecture.md`, `adr/001-*.md`, `adr/002-*.md`
 src/
 ├── i18n/       # config.ts (locales), ui.ts (UI dictionary, ru is the source), URL helpers
 ├── content/    # catalog.ts (relations + validation), archive.ts + archive-filter.ts (lists), format.ts, markdown-safety.ts
+├── forms/      # config.ts (bot URLs, sitekey), delivery.ts, payload.ts, form.client.ts: the forms of spec 010
 ├── seo/        # pages.ts (public pages), og.ts (card input), jsonld.ts (schema.org), sitemap.ts (sitemap + robots)
 ├── layouts/    # BaseLayout: canonical, hreflang, og/twitter tags
 ├── pages/      # [...locale]/ (home, events, talks, speakers, search), og/ and avatars/ (images),
@@ -159,6 +160,7 @@ scripts/        # check-seo, seo-checks (SEO gate over dist), new-entry (new:* g
 - **Speaker guide** (`/speaker-guide/`, a document with `topics` as a `Disclosure`) opens in a new tab from the
   footer and from any content link: `NEW_TAB_PATHS` in `src/content/markdown-safety.ts`, so a reader returns to the
   form or the FAQ.
+- **Forms** (spec 010): a `documents` entry with `form: cfp | feedback | question` (`/cfp/`, `/feedback/`, `/question/`) renders `components/FormPage.astro` under its body; no separate page kind. The logic is in `src/forms/`: `config.ts` is the ONLY place for the bot base URLs, the Turnstile sitekey and the fallback links (placeholders until the bot is deployed), `delivery.ts` (Cloudflare base first, direct base on network error, 8 s timeout or 5xx, same `Idempotency-Key`, never on 4xx; pure, injectable `fetch`), `payload.ts` (validation and request body per form), `form.client.ts` (DOM glue: Turnstile, field errors, current meetup for feedback and questions). Texts are `forms.*` in the dictionary. The form is `hidden` without JavaScript and `noscript` lists where to write. The privacy section for the forms is in `/privacy/`.
 - **Documents** (`documents` collection) render at `/<name>/` via
   `pages/[...locale]/[document].astro` and are public pages in `src/seo/pages.ts`
   (kind `document`, no JSON-LD). The meetup page hides the registration link once

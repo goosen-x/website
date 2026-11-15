@@ -1,0 +1,72 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import { root, label as labelClass, hint as hintClass, control, textarea, select, check, checkbox, error as errorClass, mark } from './Field.css';
+
+const Tag = 'div';
+
+// Подпись, подсказка, поле и место под ошибку собраны здесь, чтобы связь `for`/`aria-describedby` не терялась.
+// Сообщение об ошибке скрипт страницы кладёт в `[data-field-error]` и ставит `aria-invalid` на поле.
+interface Props extends HTMLAttributes<typeof Tag> {
+  /** Имя поля в теле запроса; из него же собирается `id` */
+  name: string;
+  /** Видимая подпись поля; у флажка подписью служит содержимое слота */
+  label?: string;
+  /** Какой элемент рисовать */
+  control?: 'input' | 'textarea' | 'select' | 'checkbox';
+  /** Тип `input`: text, email и т. п. */
+  type?: string;
+  /** Обязательное поле: звёздочка у подписи и `required` у элемента */
+  required?: boolean;
+  /** Пояснение под подписью: что писать и зачем это нужно */
+  hint?: string;
+  /** Подсказка внутри пустого поля */
+  placeholder?: string;
+  /** Подсказка автозаполнения браузера */
+  autocomplete?: string;
+  /** Предельная длина текста */
+  maxlength?: number;
+  /** Высота многострочного поля в строках */
+  rows?: number;
+}
+
+const {
+  name,
+  label,
+  control: kind = 'input',
+  type = 'text',
+  required = false,
+  hint,
+  placeholder,
+  autocomplete,
+  maxlength,
+  rows = 5,
+  class: className,
+  ...attrs
+} = Astro.props;
+const id = `field-${name}`;
+const describedBy = [hint ? `${id}-hint` : undefined, `${id}-error`].filter(Boolean).join(' ');
+const common = { id, name, required, 'aria-describedby': describedBy, 'data-field-control': '' };
+---
+
+<Tag class:list={[root, className]} data-field={name} {...attrs}>
+  {
+    kind === 'checkbox' ? (
+      <label class={check}>
+        <input class={checkbox} type="checkbox" value="true" {...common} />
+        <span><slot /></span>
+      </label>
+    ) : (
+      <>
+        <label class={labelClass} for={id}>
+          {label}
+          {required && <span class={mark} aria-hidden="true"> *</span>}
+        </label>
+        {hint && <p class={hintClass} id={`${id}-hint`}>{hint}</p>}
+        {kind === 'textarea' && <textarea class:list={[control, textarea]} rows={rows} maxlength={maxlength} placeholder={placeholder} {...common}></textarea>}
+        {kind === 'select' && <select class:list={[control, select]} {...common}><slot /></select>}
+        {kind === 'input' && <input class={control} type={type} maxlength={maxlength} placeholder={placeholder} autocomplete={autocomplete} {...common} />}
+      </>
+    )
+  }
+  <p class={errorClass} id={`${id}-error`} data-field-error hidden></p>
+</Tag>

@@ -32,6 +32,15 @@ contacts:
       links:
         - label: "@moscowcss_chat"
           url: "https://t.me/moscowcss_chat"
+    - title: "Формы на сайте"
+      text: "Заявка на доклад, отзыв о митапе и вопрос докладчику или организаторам: их можно отправить прямо здесь, без Telegram."
+      links:
+        - label: "Заявка на доклад"
+          url: "https://css.moscow/cfp/"
+        - label: "Отзыв о митапе"
+          url: "https://css.moscow/feedback/"
+        - label: "Задать вопрос"
+          url: "https://css.moscow/question/"
     - title: "Выступить на митапе"
       text: "Ждём фронтендеров, верстальщиков и дизайнеров интерфейсов, рады менеджерам и деврелам. Прочитайте памятку и напишите организаторам: помогут с темой, программой и подготовкой."
       links:

@@ -32,6 +32,17 @@ const MIME = {
   '.ico': 'image/x-icon',
 };
 
+const FORM_EVENT = {
+  id: 'e1',
+  title: 'Митап',
+  startsAt: '2026-12-10T18:00:00+03:00',
+  venue: 'Офис',
+  speakers: [
+    { id: 's1', name: 'Анна', talkTitle: 'Grid' },
+    { id: 's2', name: 'Борис', talkTitle: 'Контейнерные запросы' },
+  ],
+};
+
 const axeSource = await readFile(createRequire(import.meta.url).resolve('axe-core/axe.min.js'), 'utf8');
 
 const server = createServer(async (request, response) => {
@@ -73,12 +84,21 @@ const newPage = async (theme, width, { reducedMotion = 'reduce', height = 900 } 
   }, theme);
   // Чужие карты в проверке не нужны: сеть замедляет прогон и делает его нестабильным.
   await context.route(/yandex\.ru\/map-widget/, (route) => route.abort());
+  // Формы (спека 010): бот не развёрнут, поэтому митап для отзыва и вопроса отдаём сами, а капчу не грузим.
+  await context.route(/challenges\.cloudflare\.com/, (route) => route.abort());
+  await context.route(/bot-(api|direct)\.css\.moscow/, (route) =>
+    route.request().url().endsWith('/public/events/current')
+      ? route.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify(FORM_EVENT) })
+      : route.abort(),
+  );
   return { context, page: await context.newPage() };
 };
 
 const open = async (page, path) => {
   await page.goto(origin + path, { waitUntil: 'load' });
   await page.evaluate(() => document.fonts.ready);
+  // Форма показывается, когда скрипт получил митап: ждём её, чтобы проверить поля, а не заглушку.
+  if (/\/(cfp|feedback|question)\/$/.test(path)) await page.waitForSelector('form[data-form-form]:not([hidden])', { timeout: 5000 }).catch(() => {});
 };
 
 async function discoverPages() {
@@ -98,7 +118,7 @@ async function discoverPages() {
   const walls = ['/reviews/', '/en/reviews/'];
   const found = await Promise.all(walls.map(async (path) => (await fetch(origin + path)).ok));
   const reviews = walls.filter((_, index) => found[index]);
-  return ['/', '/en/', '/events/31/', talk, speaker, ...lists, ...reviews, '/search/', '/privacy/', '/about/', '/help/', '/en/help/', '/en/events/31/', '/news/holyjs-2026-spring/', '/en/news/new-site/', '/404.html'].filter(Boolean);
+  return ['/', '/en/', '/events/31/', talk, speaker, ...lists, ...reviews, '/search/', '/privacy/', '/about/', '/cfp/', '/en/cfp/', '/feedback/', '/en/question/', '/help/', '/en/help/', '/en/events/31/', '/news/holyjs-2026-spring/', '/en/news/new-site/', '/404.html'].filter(Boolean);
 }
 
 async function checkAxe(page, where) {

@@ -340,5 +340,7 @@ export const DocumentSchema = z.object({
       contact: LinkCardSchema,
     })
     .optional(),
+  // С этим полем под текстом документа стоит форма, которая отправляет данные боту сообщества (спека 010).
+  form: z.enum(['cfp', 'feedback', 'question']).optional(),
   draft: z.boolean().default(false),
 });

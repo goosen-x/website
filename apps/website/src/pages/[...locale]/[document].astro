@@ -6,6 +6,7 @@ import H1 from '@moscowcss/ui/components/H1';
 import Prose from '@moscowcss/ui/components/Prose';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import AboutPage from '../../components/AboutPage.astro';
+import FormPage from '../../components/FormPage.astro';
 import HelpPage from '../../components/HelpPage.astro';
 import EntityPage from '../../components/EntityPage.astro';
 import { body, header } from '../../components/EntityPage.css';
@@ -25,7 +26,7 @@ const { page } = Astro.props as { page: Extract<PublicPage, { kind: 'document' }
 const { locale, entry, alternates } = page;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const { Content } = await render(entry as any);
-const { title, description, topics, contacts, help } = entry.data;
+const { title, description, topics, contacts, help, form } = entry.data;
 const t = useTranslations(locale);
 ---
 
@@ -38,6 +39,7 @@ const t = useTranslations(locale);
     <Prose class={body}>
       <Content />
     </Prose>
+    {form && <FormPage form={form} locale={locale} />}
     {
       topics && (
         <Disclosure class={body} summary={topics.summary}>
