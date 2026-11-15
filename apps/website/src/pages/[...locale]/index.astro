@@ -11,6 +11,7 @@ import SchoolPartnerSection from '../../sections/SchoolPartnerSection.astro';
 import FAQSection from '../../sections/FAQSection.astro';
 import OrganizersSection from '../../sections/OrganizersSection.astro';
 import { loadCatalog, localeOf, upcomingEvent } from '../../content/catalog';
+import { heroCtaAt } from '../../content/cta';
 import { buildNow } from '../../content/now';
 import { organizersByStatus } from '../../content/organizers';
 import { registrationTabsOf } from '../../content/registration';
@@ -50,6 +51,12 @@ const registrationTabs =
       })
     : [];
 const registrationDialogId = 'registration-dialog';
+// Плавающая кнопка: регистрация до закрытия за 2 дня, вечером митапа — вопрос спикеру (content/cta.ts).
+// Решение на момент сборки; скрипт внизу пересчитывает его по часам браузера.
+const upcoming = featured && !featured.past ? featured.event : undefined;
+const hasRegistration = Boolean(upcoming?.data.registrationUrl);
+const heroCta = upcoming ? heroCtaAt(upcoming.data.date, now, hasRegistration) : null;
+const ctaStartsAt = upcoming?.data.date.toISOString();
 const partner = featured?.event.data.partner
   ? inLocale(catalog.partners).find((entry) => entry.id === `${locale}/${featured.event.data.partner}`)
   : undefined;
@@ -89,13 +96,31 @@ const alternates = locales.map((code) => ({ locale: code, path: localizePath(cod
     <OrganizersSection entries={organizers} locale={locale} />
     <AboutSection page={page} locale={locale} />
     {
-      featured && !featured.past && featured.event.data.registrationUrl && (
+      upcoming?.data.registrationUrl && (
         <CallToAction
-          href={featured.event.data.registrationUrl}
+          href={upcoming.data.registrationUrl}
           aria-label={t('hero.registerLabel')}
           data-registration-open={registrationTabs.length > 0 ? registrationDialogId : undefined}
+          data-hero-cta="register"
+          data-starts-at={ctaStartsAt}
+          data-has-registration={String(hasRegistration)}
+          hidden={heroCta !== 'register'}
         >
           {t('hero.register')}
+        </CallToAction>
+      )
+    }
+    {
+      upcoming && (
+        <CallToAction
+          href={localizePath(locale, 'question')}
+          aria-label={t('hero.questionLabel')}
+          data-hero-cta="question"
+          data-starts-at={ctaStartsAt}
+          data-has-registration={String(hasRegistration)}
+          hidden={heroCta !== 'question'}
+        >
+          {t('hero.question')}
         </CallToAction>
       )
     }
@@ -114,3 +139,22 @@ const alternates = locales.map((code) => ({ locale: code, path: localizePath(cod
     }
   </main>
 </BaseLayout>
+
+<script>
+  import { heroCtaAt } from '../../content/cta';
+
+  // Сайт собирается при пуше, а окна регистрации и вопросов — по часам: пересчитываем на месте и раз в минуту.
+  const ctas = document.querySelectorAll<HTMLElement>('[data-hero-cta]');
+  const update = () => {
+    const now = new Date();
+    for (const cta of ctas) {
+      const startsAt = new Date(cta.dataset['startsAt'] ?? '');
+      if (Number.isNaN(startsAt.getTime())) continue;
+      cta.hidden = heroCtaAt(startsAt, now, cta.dataset['hasRegistration'] === 'true') !== cta.dataset['heroCta'];
+    }
+  };
+  if (ctas.length > 0) {
+    update();
+    setInterval(update, 60_000);
+  }
+</script>

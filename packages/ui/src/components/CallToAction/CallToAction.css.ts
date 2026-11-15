@@ -26,6 +26,8 @@ export const root = style({
   cursor: 'pointer',
   mixBlendMode: 'difference',
   selectors: {
+    // Главная прячет кнопку вне её окна (регистрация, вопрос спикеру): hidden сильнее display выше.
+    '&[hidden]': { display: vars.display.none },
     '&:hover, &:focus-visible': {
       mixBlendMode: 'normal',
     },
