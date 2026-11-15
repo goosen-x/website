@@ -1,0 +1,55 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+import { root, legend as legendClass, hint as hintClass, options as optionsClass, option, radio, error as errorClass, mark } from './ChoiceGroup.css';
+
+const Tag = 'fieldset';
+
+// Выбор одного из вариантов: радиокнопки в группе с подписью-`legend`. Сообщение об ошибке скрипт страницы
+// кладёт в `[data-field-error]` и ставит `aria-invalid` на кнопки.
+interface Props extends HTMLAttributes<typeof Tag> {
+  /** Имя группы в теле запроса; из него же собирается `id` */
+  name: string;
+  /** Видимый вопрос над вариантами */
+  legend: string;
+  /** Варианты: значение для запроса и подпись */
+  options: { value: string; label: string }[];
+  /** Обязательный выбор: звёздочка у вопроса и `required` у кнопок */
+  required?: boolean;
+  /** Пояснение под вопросом */
+  hint?: string;
+  /** Раскладка: столбцом или в строку (шкала оценок) */
+  layout?: 'column' | 'row';
+}
+
+const { name, legend, options, required = false, hint, layout = 'column', class: className, ...attrs } = Astro.props;
+const id = `field-${name}`;
+const describedBy = [hint ? `${id}-hint` : undefined, `${id}-error`].filter(Boolean).join(' ');
+---
+
+<Tag class:list={[root, className]} data-field={name} {...attrs}>
+  <legend class={legendClass}>
+    {legend}
+    {required && <span class={mark} aria-hidden="true"> *</span>}
+  </legend>
+  {hint && <p class={hintClass} id={`${id}-hint`}>{hint}</p>}
+  <div class={optionsClass[layout]}>
+    {
+      options.map((item, index) => (
+        <label class={option}>
+          <input
+            class={radio}
+            type="radio"
+            id={index === 0 ? id : `${id}-${item.value}`}
+            name={name}
+            value={item.value}
+            required={required}
+            aria-describedby={describedBy}
+            data-field-control
+          />
+          <span>{item.label}</span>
+        </label>
+      ))
+    }
+  </div>
+  <p class={errorClass} id={`${id}-error`} data-field-error hidden></p>
+</Tag>
