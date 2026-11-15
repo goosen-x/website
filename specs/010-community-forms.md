@@ -59,7 +59,11 @@ site can be the front door: public forms that post to the bot and need no accoun
   in Switzerland), how long (a proposal is deleted after 12 months unless the organisers keep it), how to ask for deletion.
   The forms link to it.
 - **Where the forms are linked.** A «Формы на сайте» card in the Contacts section of `/about/`. `/cfp/` replaced the
-  Yandex form after the bot went live (2026-11-15) in the speaker guide, the help page and the FAQ on the home page. The header and the footer already hold their limit of links, and the
+  Yandex form after the bot went live (2026-11-15) in the speaker guide, the help page and the FAQ on the home page.
+  On the home page the floating button switches by the clock of the upcoming meetup (`content/cta.ts`): «Регистрация»
+  until 48 h before the start (registration closes then), nothing until an hour before the start, «вопрос: спикеру»
+  → `/question/` from an hour before until three hours after (18:00–22:00 for a 19:00 start), for guests whose
+  Telegram does not open. The build picks the state and a small script re-checks it in the browser every minute. The header and the footer already hold their limit of links, and the
   pages are in the sitemap and `llms.txt` without extra code.
 - **Errors.** Field errors sit under their field (`aria-describedby`, `aria-invalid`, the first invalid field takes
   focus); a status line announces the summary through a live region. The error colour token is below AA contrast on

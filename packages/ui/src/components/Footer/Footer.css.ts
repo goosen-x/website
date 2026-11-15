@@ -6,8 +6,8 @@ export const root = style({
   paddingInline: vars.adaptive.navPaddingInline,
   paddingBottom: vars.adaptive.navPaddingTop,
   selectors: {
-    // Плавающая кнопка регистрации не должна закрывать подвал в конце страницы.
-    'body:has([data-floating-cta]) &': {
+    // Видимая плавающая кнопка не должна закрывать подвал в конце страницы.
+    'body:has([data-floating-cta]:not([hidden])) &': {
       paddingBottom: `calc(${vars.adaptive.ctaSize} + ${vars.adaptive.ctaOffsetBlock} + ${vars.spacing.l})`,
     },
   },
