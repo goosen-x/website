@@ -24,7 +24,7 @@ This section covers the forms "Propose a talk", "Meetup feedback" and "Ask a que
 
 1. What is stored. In a talk proposal: a contact (Telegram or email), the title, theses, format, readiness, a comment and the mark of consent. In feedback: ratings and comments, without a name or contacts, so feedback cannot be linked to you. In a question: the text, who it is addressed to and a contact if you gave one.
 2. Why. We use a proposal to put together the programme and to contact you. Feedback helps speakers and organisers, and questions are stored to be answered.
-3. Spam protection. The form is checked by Cloudflare Turnstile, which processes your browser data under [its own policy](https://www.cloudflare.com/privacypolicy/).
+3. Spam protection. The form is checked by Cloudflare Turnstile, which processes your browser data under [its own policy](https://www.cloudflare.com/privacypolicy/). To limit how often forms are sent, the server counts submissions by a pseudonymous fingerprint of your IP address (an HMAC with a secret key); the address itself is not stored, and fingerprints are deleted after a day unless the address is blocked for spam.
 4. Where. The data from the forms is kept on a server in Switzerland.
 5. How long. A talk proposal is deleted automatically after 12 months unless the organisers decide to keep it longer, for example because you gave the talk. The retention period of feedback and questions is not set yet, and we will state it here.
 6. How to delete. Write to the organisers: [@DreamShaded](https://t.me/DreamShaded), [@RinaPa](https://t.me/RinaPa) or [@antytoto](https://t.me/antytoto), and name the contact from your proposal or question. Feedback is anonymous, so we cannot find and delete yours.
