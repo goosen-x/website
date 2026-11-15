@@ -100,7 +100,7 @@ const INVARIANTS = {
   organizers: ['status', 'photo', 'contacts'],
   reviews: ['category', 'speaker', 'photo', 'gallery[].image'],
   faq: ['order'],
-  documents: [],
+  documents: ['form'],
   pages: ['telegramUrl', 'questionTag', 'decor'],
 } as const;
 

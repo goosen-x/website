@@ -83,7 +83,7 @@ Decision record: `adr/001-content-model-md-relations.md`.
   `diskPhotosUrl` (Yandex Disk) link external photo albums, one or both, each checked by host; the registration link is hidden on past meetups.
 - **`documents`** are standalone pages without a section prefix
   (`documents/ru/privacy.md` → `/privacy/`; also `about`, which ends with the Contacts section, and
-  `speaker-guide`). Optional `topics` (`summary` + plain-text `items`) renders as a closed `Disclosure` after the body;
+  `speaker-guide`; the forms `cfp`, `feedback`, `question`). Optional `form: cfp | feedback | question` puts the matching form under the body (spec 010; must match `ru`). Optional `topics` (`summary` + plain-text `items`) renders as a closed `Disclosure` after the body;
   `facts` + `contacts` (`lead`, cards with `title`, `text`, `links`) switch the page to the about layout.
 - `README.md` here is for editors and is written in Russian; keep its field
   table in sync with `src/schema.ts`.

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { event, faq, organizer, page, partner, speaker, talk, twoMeetupsCatalog } from '../test/fixtures';
+import { document, event, faq, organizer, page, partner, speaker, talk, twoMeetupsCatalog } from '../test/fixtures';
 import {
   CatalogError,
   checkEventDays,
@@ -149,6 +149,12 @@ describe('validateCatalog', () => {
     const message = messageOf(() => validateCatalog(catalog));
     expect(message).toContain('поле photo');
     expect(message).toContain('поле links');
+  });
+
+  it('документ с формой: форма в переводе должна совпадать с ru', () => {
+    const catalog = twoMeetupsCatalog();
+    catalog.documents = [document('ru/cfp', { form: 'cfp' }), document('en/cfp', { form: 'question' })];
+    expect(messageOf(() => validateCatalog(catalog))).toContain('documents/en/cfp.md: поле form отличается от ru/cfp');
   });
 
   it('организатор: расхождение status между языками — файл и поле в сообщении', () => {
