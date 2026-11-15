@@ -32,15 +32,16 @@ site can be the front door: public forms that post to the bot and need no accoun
   `turnstileToken` + the honeypot `website`, header `Idempotency-Key`; `GET {base}/public/events/current` for the
   meetup and its speakers. Answers: 201 / 200 `duplicate` / 202 accepted, 422 `fields` (shown under the matching
   field), 429, 403 `blocked` or `captcha_failed`, 5xx.
-- **Delivery chain** (the bot's ADR). The Cloudflare-fronted base is tried first; a network error, a timeout (8 s) or
-  5xx moves to the direct base with the same `Idempotency-Key`; a 4xx is never retried. The key lives as long as the
+- **Delivery chain** (the bot's ADR, spec 005 of the bot). The bot has one base, `https://api.css.moscow` (nginx on
+  the bot's server, no Cloudflare in front); a network error, a timeout (8 s) or 5xx retries it once with the same
+  `Idempotency-Key`; a 4xx is never retried. The key lives as long as the
   content stays the same, so a manual retry after a failure reuses it and an edit starts a new one. If both fail the
   input stays and the page shows «Не получилось отправить форму. Напишите нам:» with the bot, VK, the chat and the
   three organisers.
-- **One config module.** `apps/website/src/forms/config.ts` holds both base URLs, the Turnstile sitekey and script,
-  the timeout and the fallback links. The URLs (`https://bot-api.css.moscow`, `https://bot-direct.css.moscow`) and the
-  sitekey (Cloudflare's test key `1x00000000000000000000AA`) are placeholders set at deploy time; the bot link in the
-  fallback list has an empty address and is not shown until it is known.
+- **One config module.** `apps/website/src/forms/config.ts` holds the base URL, the Turnstile sitekey and script,
+  the timeout and the fallback links. The bot was deployed on 2026-11-15: the base is `https://api.css.moscow`, the
+  sitekey is the production widget for css.moscow, and the fallback list links @MoscowCSS_bot. The plan of a
+  Cloudflare-fronted base plus a direct one was dropped by the owner (DNS stays at reg.ru).
 - **Spam.** Cloudflare Turnstile (explicit render, the page theme and language) and a honeypot `website`: out of the
   flow, `aria-hidden`, `tabindex="-1"`, not `display: none`. The widget's box is reserved, so the form does not move
   when the script loads.
@@ -75,7 +76,7 @@ site can be the front door: public forms that post to the bot and need no accoun
 
 1. `/cfp/`, `/feedback/`, `/question/` and their `/en/` versions are public pages: canonical, hreflang, OG card, sitemap,
    Markdown twin; `pnpm lint`, `pnpm test`, `pnpm build`, `check:seo`, `check:a11y` and `build:storybook` pass.
-2. The base URLs and the sitekey appear in `apps/website/src/forms/config.ts` only.
+2. The base URL and the sitekey appear in `apps/website/src/forms/config.ts` only.
 3. The delivery chain, the response mapping, the idempotency key and the per-form payload are covered by unit tests:
    a 4xx is never retried, a 5xx or a network error retries once with the same key, the venue block is absent for online.
 4. Honeypot is empty for people, out of the tab order and hidden from assistive technology.

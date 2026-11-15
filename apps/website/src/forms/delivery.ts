@@ -49,12 +49,13 @@ export async function outcomeOf(response: Response): Promise<Outcome | undefined
 }
 
 /**
- * Общий путь запроса: сначала адрес за Cloudflare, при сетевой ошибке, таймауте или 5xx — прямой, с теми же
+ * Общий путь запроса: адреса из `bases` по очереди; при сетевой ошибке, таймауте или 5xx — следующий, с теми же
  * заголовками (в том числе `Idempotency-Key`). Ответ 4xx не повторяется никогда. Если не ответил ни один адрес —
- * `undefined`.
+ * `undefined`. Адрес у бота один, поэтому по умолчанию он стоит дважды: один повтор того же запроса, а ключ
+ * идемпотентности не даёт повтору создать вторую заявку.
  */
 async function attempt(path: string, init: RequestInit, options: DeliveryOptions): Promise<{ outcome?: Outcome; response?: Response } | undefined> {
-  const { bases = [formsConfig.primaryBase, formsConfig.directBase], timeoutMs = formsConfig.timeoutMs, fetchImpl = fetch } = options;
+  const { bases = [formsConfig.apiBase, formsConfig.apiBase], timeoutMs = formsConfig.timeoutMs, fetchImpl = fetch } = options;
   for (const base of bases) {
     try {
       const response = await fetchImpl(`${base}${path}`, { ...init, signal: AbortSignal.timeout(timeoutMs) });

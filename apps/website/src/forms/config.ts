@@ -1,12 +1,9 @@
-// Единственное место с адресами бота и ключом капчи. Значения временные: их подставляют при
-// развёртывании бота, в других файлах адреса не повторяются.
+// Единственное место с адресом бота и ключом капчи: в других файлах они не повторяются.
 export const formsConfig = {
-  // Адрес за Cloudflare: пробуем первым
-  primaryBase: 'https://bot-api.css.moscow',
-  // Прямой адрес сервера: запасной путь, если первый не ответил
-  directBase: 'https://bot-direct.css.moscow',
-  // Публичный ключ Cloudflare Turnstile; сейчас официальный тестовый, пропускает любой ответ
-  turnstileSiteKey: '1x00000000000000000000AA',
+  // HTTP API бота (moscowcss-bot, спека 005): nginx на сервере, без Cloudflare перед ним
+  apiBase: 'https://api.css.moscow',
+  // Публичный ключ Cloudflare Turnstile виджета для css.moscow; секретная пара живёт только на сервере бота
+  turnstileSiteKey: '0x4AAAAAAGB_qEV7hzYwuObm',
   turnstileScript: 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit',
   // Сколько ждать ответа одного адреса до перехода к следующему, мс
   timeoutMs: 8000,
@@ -20,10 +17,9 @@ export interface FallbackLink {
   href: string;
 }
 
-// Куда писать, если форма не отправилась. Пока бот не развёрнут, у его ссылки пустой адрес:
-// такую ссылку страница не показывает, а при развёртывании сюда ставят настоящий адрес.
+// Куда писать, если форма не отправилась. Ссылку с пустым адресом страница не показывает.
 export const fallbackLinks: readonly FallbackLink[] = [
-  { labelKey: 'forms.fallback.bot', href: '' },
+  { labelKey: 'forms.fallback.bot', href: 'https://t.me/MoscowCSS_bot' },
   { labelKey: 'forms.fallback.vk', href: 'https://vk.ru/css_moscow' },
   { labelKey: 'forms.fallback.chat', href: 'https://t.me/moscowcss_chat' },
   { handle: '@DreamShaded', href: 'https://t.me/DreamShaded' },
